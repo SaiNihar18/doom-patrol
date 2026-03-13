@@ -1,0 +1,53 @@
+{
+  "manifest_version": 3,
+  "name": "Doom Patrol",
+  "version": "1.0",
+  "description": "Premium humorous scroll police that stops doom-scrolling on social media with memes. 100% Privacy Focused.",
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://*.instagram.com/*",
+    "https://*.youtube.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.instagram.com/*",
+        "https://*.youtube.com/*"
+      ],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_ui": {
+    "page": "settings/settings.html",
+    "open_in_tab": true
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "memes/*",
+        "ui/overlay.html",
+        "ui/overlay.css",
+        "icons/*"
+      ],
+      "matches": [
+        "https://*.instagram.com/*",
+        "https://*.youtube.com/*"
+      ]
+    }
+  ],
+  "icons": {
+    "128": "icons/icon128.png"
+  }
+}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Doom Patrol Configuration</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand">
+        <span class="indicator"></span>
+        <h1>Configuration</h1>
+      </div>
+      <div class="version">v1.0.0</div>
+    </div>
+
+    <div class="privacy-notice">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="min-width: 18px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      <div>
+        <strong>Privacy First Platform</strong><br>
+        Doom Patrol runs entirely verified on your local device via Chrome Storage API. We do not track you, and absolutely zero telemetry is sent anywhere.
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Target Monitors</h2>
+      <p class="desc">Select the endpoints to track continuous session usage.</p>
+      
+      <div class="card-list">
+        <div class="setting-item">
+          <div class="setting-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            Instagram Reels
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="site-instagram">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item border-top">
+          <div class="setting-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+            YouTube Shorts
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="site-youtube">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Intervention Logic</h2>
+      
+      <div class="card-list">
+        <div class="setting-item align-top">
+          <div class="setting-info">
+            <div class="setting-title">Enable Interventions</div>
+            <div class="setting-desc">Master toggle to turn the visual memetic overlay on or off. Updates tracking will still work silently.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-overlay">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item align-top border-top">
+          <div class="setting-info">
+            <div class="setting-title">Time Threshold</div>
+            <div class="setting-desc">How many continuous minutes trigger an intervention? Select custom to type an exact limit.</div>
+          </div>
+          <div class="input-group">
+            <select id="time-limit-select" class="dropdown">
+              <option value="5">5 Minutes</option>
+              <option value="7">7 Minutes</option>
+              <option value="10">10 Minutes</option>
+              <option value="15">15 Minutes</option>
+              <option value="30">30 Minutes</option>
+              <option value="custom">Custom...</option>
+            </select>
+            <input type="number" id="time-limit-custom" class="input-text hidden" min="1" max="1440" placeholder="Mins">
+          </div>
+        </div>
+
+        <div class="setting-item align-top border-top">
+          <div class="setting-info">
+            <div class="setting-title">Velocity Tracking</div>
+            <div class="setting-desc">Detect rapid swiping/scrolling bursts (>20 rapid events) and intervene early before time threshold.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-scroll-detect">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item align-top border-top">
+          <div class="setting-info">
+            <div class="setting-title">Friction Protocol</div>
+            <div class="setting-desc">Forces you to wait 3 seconds before clicking the 'Dismiss' button on overlays.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-friction">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <button id="btn-save" class="btn-primary">Deploy Settings</button>
+      <span id="save-msg" class="save-msg">Changes replicated to local storage</span>
+    </div>
+
+  </div>
+  <script src="settings.js"></script>
+</body>
+</html>
