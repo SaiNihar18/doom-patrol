@@ -5,8 +5,23 @@ let scrollCount = 0;
 let lastScrollTime = Date.now();
 let activeSite = "";
 let scrollTimer = null;
-let sessionStartTime = null;
 let pausedVideos = [];
+
+// Active-time tracking (only counts while tab is visible and focused)
+let activeSessionMs = 0;    // accumulated active ms for the reminder timer
+let tabActiveStart = null;  // timestamp when the current active window started
+let dailyActiveMs = 0;      // accumulated active ms for the current 1-min tally bucket
+let dailyBucketStart = null;
+
+function getActiveSessionMins() {
+    const live = (tabActiveStart !== null) ? (Date.now() - tabActiveStart) : 0;
+    return (activeSessionMs + live) / 60000;
+}
+
+function getDailyBucketMins() {
+    const live = (dailyBucketStart !== null) ? (Date.now() - dailyBucketStart) : 0;
+    return (dailyActiveMs + live) / 60000;
+}
 
 const memes = ["memes/stop1.jpg", "memes/stop2.jpg", "memes/stop3.jpg"];
 const roasts = [
@@ -30,7 +45,31 @@ if (window.location.hostname.includes("reddit.com")) activeSite = "reddit";
 // Load settings
 chrome.storage.sync.get(["monitoredSites", "reminderTimeMins", "scrollDetectionEnabled", "overlayEnabled"], (res) => {
     if (res.monitoredSites && res.monitoredSites[activeSite]) {
-        sessionStartTime = Date.now();
+        // Start counters only if the tab is already visible
+        if (!document.hidden) {
+            tabActiveStart = Date.now();
+            dailyBucketStart = Date.now();
+        }
+
+        // Pause/resume counters when tab visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // Tab went to background — freeze both counters
+                if (tabActiveStart !== null) {
+                    activeSessionMs += Date.now() - tabActiveStart;
+                    tabActiveStart = null;
+                }
+                if (dailyBucketStart !== null) {
+                    dailyActiveMs += Date.now() - dailyBucketStart;
+                    dailyBucketStart = null;
+                }
+            } else {
+                // Tab came back to foreground — resume counters
+                tabActiveStart = Date.now();
+                dailyBucketStart = Date.now();
+            }
+        });
+
         setInterval(updateDailyUsage, 60000); // 1-minute tally
 
         if (res.scrollDetectionEnabled) {
@@ -45,6 +84,7 @@ chrome.storage.sync.get(["monitoredSites", "reminderTimeMins", "scrollDetectionE
 });
 
 function handleScroll() {
+    if (document.hidden) return; // ignore scroll events while backgrounded
     const now = Date.now();
     if (now - lastScrollTime > 1500) {
         scrollCount++;
@@ -64,15 +104,30 @@ function handleScroll() {
 }
 
 function checkTimeLimit(limitMins) {
-    if (!sessionStartTime) return;
-    const elapsedMins = (Date.now() - sessionStartTime) / 60000;
+    if (document.hidden || tabActiveStart === null) return; // only fire when tab is active
+    const elapsedMins = getActiveSessionMins();
     if (elapsedMins >= limitMins) {
         triggerIntervention(`You've been here for ${Math.round(elapsedMins)} minutes.`);
-        sessionStartTime = Date.now(); // Reset session
+        // Reset the active-session counter
+        activeSessionMs = 0;
+        tabActiveStart = Date.now();
     }
 }
 
 function updateDailyUsage() {
+    // Only tally a minute if the tab was actively used for at least 30s of the last minute
+    const activeMins = getDailyBucketMins();
+    if (activeMins < 0.5) {
+        // Not enough active time — reset bucket without counting
+        dailyActiveMs = 0;
+        dailyBucketStart = document.hidden ? null : Date.now();
+        return;
+    }
+
+    // Reset bucket
+    dailyActiveMs = 0;
+    dailyBucketStart = document.hidden ? null : Date.now();
+
     chrome.storage.local.get(["dailyUsage"], (res) => {
         let usage = res.dailyUsage || { total: 0 };
         if (!usage[activeSite]) usage[activeSite] = 0;
@@ -160,7 +215,9 @@ async function triggerIntervention(reasonText) {
 
         btnSnooze.addEventListener("click", () => {
             closeOverlay(container, mainContainer);
-            sessionStartTime = Date.now(); // reset timer
+            // Reset active-session counter so the snooze gives a fresh window
+            activeSessionMs = 0;
+            tabActiveStart = document.hidden ? null : Date.now();
             scrollCount = 0; // reset scrolls
 
             // Resume only the videos that were playing
